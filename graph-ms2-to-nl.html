@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+        <meta name="description" content=""/>
+        <meta name="author" content=""/>
+
+        <title>METLIN Graph MS2 to NL</title>
+    </head>
+
+    <body class="nav-fixed">
+
+        <div class="card card-header-actions h-100">
+            <div class="card-header"> Search Result </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div id="nlContainer"></div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div id="ms2Container"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!---------- Javascript CDN Section ---------->
+        <script type="text/javascript" src="https://code.highcharts.com/highcharts.js"></script>
+        <script type="text/javascript" src="https://code.highcharts.com/modules/data.js"></script>
+        <script type="text/javascript" src="https://code.highcharts.com/modules/series-label.js"></script>
+        <script type="text/javascript" src="https://code.highcharts.com/modules/exporting.js"></script>
+        <script type="text/javascript" src="https://code.highcharts.com/modules/export-data.js"></script>
+        <script type="text/javascript" src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+        <script type="text/javascript">
+
+            /*******************************************************************
+             *
+             *
+             *
+             ******************************************************************/
+            function graphNLAndMS2Data(mid1, mid2, f1, f2) {
+
+                var ms2Chart = Highcharts.chart('ms2Container', {
+                    chart: {
+                        type: 'column',
+                        maxWidth: 800,
+                    },
+                    title: {
+                        text: 'MS/MS',
+                        style: {
+                            fontSize: "10px",
+                            fontWeight: "bold"
+                        },
+                    },
+                    subtitle:{
+                        align: "left",
+                        floating: false,
+                        useHTML: true,
+                        x: 150,
+                        text: "",
+                        style: {
+                            fontSize: "10px"
+                        },
+                    },
+                    xAxis: {
+                        min:0,
+                        max:0,
+                        "crosshair":"false",
+                        tickInterval:50,
+                            title:{
+                                text:"Mass (m/z)",
+                                style: {
+                                    fontSize: "10px"
+                                },
+                            },
+                        resize: {
+                            enabled: false
+                        },
+                        labels: {
+                            style: {
+                                fontSize: "10px"
+                            }
+                        },
+                    },
+                    yAxis: {
+                        min:-100,
+                        max:100,
+                        tickInterval:50,
+                        title: {
+                            text: 'Relative Ion Intensity',
+                            style: {
+                                fontSize: "10px"
+                            },
+                        },
+                        resize: {
+                            enabled: false
+                        },
+                        labels: {
+                            style: {
+                                fontSize: "10px"
+                            }
+                        },
+                    },
+                    tooltip:{
+                        headerFormat:'<table class="table table-striped table-sm"><tbody><tr><th scope="row" style="width:20%;">m/z</th><td>{point.key:.3f}</td></tr> <tr><th scope="row">Intensity</th><td>{point.y:.2f}%</td></tr>',
+                        pointFormat:"",
+                        footerFormat:'<tr><th scope="row">Mode/CE</th><td>{series.name}</td></tr></tbody></table>',
+                        shared:"true",
+                        useHTML:"true"
+                    },
+                    plotOptions:{
+                        series:{
+                            pointWidth:2,
+                            stacking:"normal",
+                            visible: false
+                        },
+                        column:{
+                            pointPadding:0.2,
+                            borderWidth:2
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    series:[],
+
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                legend: {
+                                    align: 'center',
+                                    verticalAlign: 'bottom',
+                                    layout: 'horizontal'
+                                },
+                                yAxis: {
+                                    labels: {
+                                        align: 'left',
+                                        x: 0,
+                                        y: -5
+                                    },
+                                    title: {
+                                        text: null
+                                    }
+                                },
+                                subtitle: {
+                                    text: null
+                                },
+                                credits: {
+                                    enabled: false
+                                }
+                            }
+                        }]
+                    },
+
+                    exporting: {
+                        buttons: [{
+                            enabled: false
+                        }]
+                    },
+                });
+
+                // Show Loader on MS2 Chart
+                ms2Chart.showLoading();
+                ms2Chart.setSize(null);
+
+                var nlChart = Highcharts.chart('nlContainer', {
+                    chart: {
+                        type: 'column',
+                        maxWidth: 1142,
+                    },
+                    title: {
+                        text: 'Neutral Loss',
+                        style: {
+                            fontSize: "10px",
+                            fontWeight: "bold"
+                        },
+                    },
+                    subtitle:{
+                        align: "left",
+                        floating: false,
+                        useHTML: true,
+                        x: 150,
+                        text: "",
+                        style: {
+                            fontSize: "10px"
+                        },
+                    },
+                    xAxis: {
+                        min:0,
+                        max:0,
+                        "crosshair":"false",
+                        tickInterval:50,
+                            title:{
+                                text:"Δ m\/z",
+                                style: {
+                                    fontSize: "10px"
+                                },
+                            },
+                        resize: {
+                            enabled: false
+                        },
+                        labels: {
+                            style: {
+                                fontSize: "10px"
+                            }
+                        },
+                    },
+                    yAxis: {
+                        min:-100,
+                        max:100,
+                        tickInterval:50,
+                        title: {
+                            text: 'Relative NL Intensity',
+                            style: {
+                                fontSize: "10px"
+                            },
+                        },
+                        resize: {
+                            enabled: false
+                        },
+                        labels: {
+                            style: {
+                                fontSize: "10px"
+                            }
+                        },
+                    },
+                    tooltip:{
+                        headerFormat:'<table class="table table-striped table-sm"><tbody><tr><th scope="row" style="width:20%;">m/z</th><td>{point.key:.3f}</td></tr> <tr><th scope="row">Intensity</th><td>{point.y:.2f}%</td></tr>',
+                        pointFormat:"",
+                        footerFormat:'<tr><th scope="row">Mode/CE</th><td>{series.name}</td></tr></tbody></table>',
+                        shared:"true",
+                        useHTML:"true"
+                    },
+                    plotOptions:{
+                        series:{
+                            pointWidth:2,
+                            stacking:"normal",
+                            visible: false,
+                            events: {
+                                legendItemClick: function(event) {
+                                    series = ms2Chart.get(this.options.id); //get corresponding series
+
+                                    if (series) {
+                                        if (this.visible) {
+                                            series.hide();
+                                        } else {
+                                            series.show();
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        column:{
+                            pointPadding:0.2,
+                            borderWidth:2
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    legend:{
+                        title: {
+                            text: 'Compound List',
+                        },
+                        useHTML: true,
+                        align:'right',
+                        verticalAlign:'middle',
+                        layout:'vertical',
+
+                        symbolHeight: 10,
+                        symbolRadius: 10,
+
+                        symbolPadding: 10,
+                        symbolWidth: 5,
+
+                        labelFormatter: function() {
+                            return (this.name);
+                        },
+                    },
+                    series:[],
+
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 1142
+                            },
+                            chartOptions: {
+                                legend: {
+                                    align: 'center',
+                                    verticalAlign: 'bottom',
+                                    layout: 'horizontal'
+                                },
+                                yAxis: {
+                                    labels: {
+                                        align: 'left',
+                                        x: 0,
+                                        y: -5
+                                    },
+                                    title: {
+                                        text: null
+                                    }
+                                },
+                                subtitle: {
+                                    text: null
+                                },
+                                credits: {
+                                    enabled: false
+                                }
+                            }
+                        }]
+                    },
+
+                    exporting: {
+                        buttons: [{
+                            text: 'Flip',
+                            align: 'right',
+                            enabled: false,
+                            onclick: function () {
+
+                                for (var x in this.series) {
+                                    var tmpArray = [];
+
+                                    for (var y in this.series[x].yData) {
+
+                                        tmpArray.push([this.series[x].xData[y], (this.series[x].yData[y] * -1)]);
+                                    }
+                                    this.series[x].setData(tmpArray);
+                                }
+
+                                for (var x in ms2Chart.series) {
+                                    var tmpArray = [];
+
+                                    for (var y in ms2Chart.series[x].yData) {
+                                        tmpArray.push([ms2Chart.series[x].xData[y], (ms2Chart.series[x].yData[y] * -1)]);
+                                    }
+
+                                    ms2Chart.series[x].setData(tmpArray);
+                                }
+                            },
+                            theme: {
+                                padding: 5,
+                                stroke: 'black',
+                                verticalAlign: 'top',
+                                r: 0,
+                                states: {
+                                    hover: {
+                                        fill: '#a4edba'
+                                    },
+                                    select: {
+                                        stroke: '#039',
+                                        fill: '#a4edba'
+                                    }
+                                }
+                            }
+                        },{
+                            text: 'All Neg',
+                            align: 'right',
+                            enabled: true,
+                            onclick: function () {
+
+                                var tmp;
+                                $(nlChart.series).each(function(){
+                                    tmp = this.userOptions.name;
+
+                                    if (tmp.split(" ")[0].indexOf("-") >= 0) {
+                                        this.setVisible(true, true);
+                                    } else {
+                                        this.setVisible(false, false);
+                                    }
+                                });
+                                nlChart.redraw();
+
+                                $(ms2Chart.series).each(function(){
+                                    tmp = this.userOptions.name;
+                                    if (tmp.split(" ")[0].indexOf("-") >= 0) {
+                                        this.setVisible(true, true);
+                                    } else {
+                                        this.setVisible(false, false);
+                                    }
+                                });
+                                ms2Chart.redraw();
+                            },
+                            theme: {
+                                padding: 5,
+                                stroke: 'black',
+                                verticalAlign: 'top',
+                                r: 0,
+                                states: {
+                                    hover: {
+                                        fill: '#a4edba'
+                                    },
+                                    select: {
+                                        stroke: '#039',
+                                        fill: '#a4edba'
+                                    }
+                                }
+                            }
+                        },{
+                            text: 'All Pos',
+                            align: 'right',
+                            enabled: true,
+                            onclick: function () {
+
+                                var tmp;
+                                $(nlChart.series).each(function(){
+                                    tmp = this.userOptions.name;
+                                    if (tmp.split(" ")[0].indexOf("+") >= 0) {
+                                        this.setVisible(true, true);
+                                    } else {
+                                        this.setVisible(false, false);
+                                    }
+                                });
+                                nlChart.redraw();
+
+                                $(ms2Chart.series).each(function(){
+                                    tmp = this.userOptions.name;
+                                    if (tmp.split(" ")[0].indexOf("+") >= 0) {
+                                        this.setVisible(true, true);
+                                    } else {
+                                        this.setVisible(false, false);
+                                    }
+                                });
+                                ms2Chart.redraw();
+                            },
+                            theme: {
+                                padding: 5,
+                                stroke: 'black',
+                                verticalAlign: 'top',
+                                r: 0,
+                                states: {
+                                    hover: {
+                                        fill: '#a4edba'
+                                    },
+                                    select: {
+                                        stroke: '#039',
+                                        fill: '#a4edba'
+                                    }
+                                }
+                            }
+                        },{
+                            text: 'Show All',
+                            align: 'right',
+                            enabled: true,
+                            onclick: function () {
+
+                                $(nlChart.series).each(function(){
+                                    this.setVisible(true, true);
+                                });
+                                nlChart.redraw();
+
+                                $(ms2Chart.series).each(function(){
+                                    this.setVisible(true, true);
+                                });
+                                ms2Chart.redraw();
+                            },
+                            theme: {
+                                padding: 5,
+                                stroke: 'black',
+                                verticalAlign: 'top',
+                                r: 0,
+                                states: {
+                                    hover: {
+                                        fill: '#a4edba'
+                                    },
+                                    select: {
+                                        stroke: '#039',
+                                        fill: '#a4edba'
+                                    }
+                                }
+                            }
+                        },{
+                            text: 'Hide All',
+                            align: 'right',
+                            enabled: true,
+                            onclick: function () {
+
+                                var tmp;
+                                $(nlChart.series).each(function(){
+                                    this.setVisible(false, false);
+                                });
+                                nlChart.redraw();
+
+                                $(ms2Chart.series).each(function(){
+                                    this.setVisible(false, false);
+                                });
+                                ms2Chart.redraw();
+                            },
+                            theme: {
+                                padding: 5,
+                                stroke: 'black',
+                                verticalAlign: 'top',
+                                r: 0,
+                                states: {
+                                    hover: {
+                                        fill: '#a4edba'
+                                    },
+                                    select: {
+                                        stroke: '#039',
+                                        fill: '#a4edba'
+                                    }
+                                }
+                            }
+                        }
+                        ]
+                    },
+                });
+
+                // Show Loader on NL chart
+                nlChart.showLoading();
+                nlChart.setSize(null);
+
+                var xMax1  = 0;
+                var xMax2  = 0;
+                var maxLen = 20;
+
+                $.ajax({
+                    type: "POST",
+                    url: "createChartAjax.php",
+                    data: {
+                        f1:          f1,
+                        f2:          f2,
+                        mid1:        mid1,
+                        mid2:        mid2,
+                        spectraType: 1,
+                        nlType:      1
+                    },
+                    dataType: 'json',
+                    async: true,
+                    success: function (data) {
+
+                        // Hide Loader on NL Chart
+                        nlChart.hideLoading();
+                        xMax1 = Math.ceil(data.xAxis.max / 50) * 50;
+                        nlChart.setTitle(null, { text: data.subtitle.text});
+
+                        if (data.subtitle.text.indexOf("vs.") >= 0) {
+                            $("#cmpdName1").html($("#cmpdName1").html() + data.subtitle.text.split("vs.")[0].trim());
+                            $("#cmpdName2").html($("#cmpdName2").html() + data.subtitle.text.split("vs.")[1].trim());
+                        } else {
+                            $("#cmpdName1").html($("#cmpdName1").html() + data.subtitle.text);
+                            $("#cmpdName2").html($("#cmpdName2").html() + data.subtitle.text);
+
+                            ms2Chart.yAxis[0].update({min: 0});
+                            ms2Chart.yAxis[0].update({max: 100});
+
+                            nlChart.yAxis[0].update({min: 0});
+                            nlChart.yAxis[0].update({max: 100});
+
+                            nlChart.exportSVGElements[0].hide();
+                        }
+
+                        $.each(data.series, function (key, value) {
+
+                            nlChart.addSeries({
+                                name: value.name.slice(0, maxLen) + '...',
+                                id:   value.id,
+                                data: value.data
+                            });
+                        });
+
+                        nlChart.setSize(null);
+                    }
+                });
+
+                $.ajax({
+                    type: "POST",
+                    url: "createChartAjax.php",
+                    data: {
+                        f1:          f1,
+                        f2:          f2,
+                        mid1:        mid1,
+                        mid2:        mid2,
+                        spectraType: 0
+                    },
+                    dataType: 'json',
+                    async: true,
+                    success: function (data) {
+
+                        // Hide Loader on MS2 Chart
+                        ms2Chart.hideLoading();
+                        xMax1 = Math.ceil(data.xAxis.max / 50) * 50;
+                        ms2Chart.setTitle(null, { text: data.subtitle.text});
+
+                        $.each(data.series, function (key, value) {
+
+                            if (xMax1 > xMax2) {
+                                ms2Chart.xAxis[0].update({max: xMax1});
+                                nlChart.xAxis[0].update({max: xMax1});
+                            } else {
+                                ms2Chart.xAxis[0].update({max: xMax2});
+                                nlChart.xAxis[0].update({max: xMax2});
+                            }
+
+                            ms2Chart.addSeries({
+                                name: value.name.slice(0, maxLen) + '...',
+                                id:   value.id,
+                                data: value.data
+                            });
+                        });
+
+                        ms2Chart.setSize(null);
+                    }
+                });
+            }
+
+            $(document).ready(function() {
+            });
+
+        </script>
+    </body>
+</html>
