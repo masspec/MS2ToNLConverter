@@ -10,3 +10,6 @@ JASMS in review.
 ## Installation
 
 Copy the .html and .php files into your web server directory (/var/www/html)
+
+## Third Party Support
+Graphing tool - https://www.highcharts.com/demo/column-basic
