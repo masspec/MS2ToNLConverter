@@ -12,6 +12,6 @@ JASMS in review.
 Copy the .html and .php files into your web server directory (/var/www/html)
 
 ## Third Party Support
-Graphing tool - https://www.highcharts.com/demo/column-basic
-PHP 7.4 - https://www.php.net/releases/7_4_0.php
-Ubuntu 20.04 - https://releases.ubuntu.com/20.04/
+1. Graphing tool - https://www.highcharts.com/demo/column-basic
+2. PHP 7.4 - https://www.php.net/releases/7_4_0.php
+3. Ubuntu 20.04 - https://releases.ubuntu.com/20.04/
